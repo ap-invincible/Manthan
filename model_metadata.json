@@ -1,0 +1,17 @@
+{
+    "model_type": "Random Forest",
+    "accuracy": 0.6914893617021277,
+    "features": [
+        "skill_match_score",
+        "experience_match_score",
+        "cgpa_score",
+        "projects_score"
+    ],
+    "classes": [
+        "hired",
+        "rejected",
+        "shortlisted"
+    ],
+    "training_samples": 373,
+    "test_accuracy": 0.6914893617021277
+}

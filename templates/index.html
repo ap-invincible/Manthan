@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Job Recommendation System</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f2f5; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+        h1 { text-align: center; color: #1e3a8a; margin-bottom: 30px; }
+        .tabs { display: flex; gap: 10px; margin-bottom: 20px; }
+        .tab { padding: 12px 24px; background: white; border: none; cursor: pointer; border-radius: 8px; font-size: 16px; }
+        .tab.active { background: #1e3a8a; color: white; }
+        .section { display: none; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .section.active { display: block; }
+        .form-group { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 8px; font-weight: 600; color: #333; }
+        input, textarea, select { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; }
+        textarea { min-height: 100px; resize: vertical; }
+        button { background: #1e3a8a; color: white; padding: 12px 30px; border: none; border-radius: 6px; cursor: pointer; font-size: 16px; }
+        button:hover { background: #1e40af; }
+        .results { margin-top: 30px; }
+        .card { background: #f9fafb; padding: 20px; margin-bottom: 15px; border-radius: 8px; border-left: 4px solid #1e3a8a; }
+        .score { font-size: 24px; font-weight: bold; color: #10b981; }
+        .list-item { display: flex; justify-content: space-between; align-items: center; padding: 15px; background: #f9fafb; margin-bottom: 10px; border-radius: 8px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🤖 AI-Powered Job Recommendation System</h1>
+        
+        <div class="tabs">
+            <button class="tab active" onclick="showTab('jobs')">Post Job</button>
+            <button class="tab" onclick="showTab('candidates')">Register Candidate</button>
+            <button class="tab" onclick="showTab('apply')">Apply to Job</button>
+            <button class="tab" onclick="showTab('shortlist')">Shortlist Candidates</button>
+            <button class="tab" onclick="showTab('recommend')">Get Recommendations</button>
+        </div>
+
+        <!-- Post Job Section -->
+        <div id="jobs" class="section active">
+            <h2>Post a New Job</h2>
+            <form id="jobForm">
+                <div class="form-group">
+                    <label>Job Title</label>
+                    <input type="text" id="job_title" required>
+                </div>
+                <div class="form-group">
+                    <label>Company</label>
+                    <input type="text" id="job_company" required>
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea id="job_description" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Required Skills (comma-separated)</label>
+                    <input type="text" id="job_skills" placeholder="Python, Flask, Machine Learning" required>
+                </div>
+                <div class="form-group">
+                    <label>Experience Required (years)</label>
+                    <input type="number" step="0.5" id="job_experience" value="0">
+                </div>
+                <div class="form-group">
+                    <label>Minimum Qualification</label>
+                    <input type="text" id="job_qualification" placeholder="Bachelor's in Computer Science">
+                </div>
+                <div class="form-group">
+                    <label>Location</label>
+                    <input type="text" id="job_location" placeholder="Remote / City Name">
+                </div>
+                <button type="submit">Post Job</button>
+            </form>
+        </div>
+
+        <!-- Register Candidate Section -->
+        <div id="candidates" class="section">
+            <h2>Register as Candidate</h2>
+            <form id="candidateForm">
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" id="candidate_name" required>
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="candidate_email" required>
+                </div>
+                <div class="form-group">
+                    <label>Skills (comma-separated)</label>
+                    <input type="text" id="candidate_skills" placeholder="Python, JavaScript, React" required>
+                </div>
+                <div class="form-group">
+                    <label>Experience (years)</label>
+                    <input type="number" step="0.5" id="candidate_experience" value="0">
+                </div>
+                <div class="form-group">
+                    <label>Education</label>
+                    <input type="text" id="candidate_education" placeholder="B.Tech in Computer Science">
+                </div>
+                <div class="form-group">
+                    <label>Resume Summary</label>
+                    <textarea id="candidate_resume"></textarea>
+                </div>
+                <button type="submit">Register</button>
+            </form>
+        </div>
+
+        <!-- Apply to Job Section -->
+        <div id="apply" class="section">
+            <h2>Apply to a Job</h2>
+            <div class="form-group">
+                <label>Select Job</label>
+                <select id="apply_job_select"></select>
+            </div>
+            <div class="form-group">
+                <label>Select Candidate</label>
+                <select id="apply_candidate_select"></select>
+            </div>
+            <button onclick="submitApplication()">Submit Application</button>
+        </div>
+
+        <!-- Shortlist Candidates Section -->
+        <div id="shortlist" class="section">
+            <h2>Shortlist Candidates for Job</h2>
+            <div class="form-group">
+                <label>Select Job</label>
+                <select id="shortlist_job_select"></select>
+            </div>
+            <div class="form-group">
+                <label>Number of Candidates to Shortlist</label>
+                <input type="number" id="top_n" value="5" min="1">
+            </div>
+            <button onclick="performShortlisting()">Run AI Shortlisting</button>
+            <div id="shortlistResults" class="results"></div>
+        </div>
+
+        <!-- Recommendations Section -->
+        <div id="recommend" class="section">
+            <h2>Get Job Recommendations</h2>
+            <div class="form-group">
+                <label>Select Candidate</label>
+                <select id="recommend_candidate_select"></select>
+            </div>
+            <button onclick="getRecommendations()">Get Recommendations</button>
+            <div id="recommendResults" class="results"></div>
+        </div>
+    </div>
+
+    <script>
+        function showTab(tabName) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+            
+            if (['apply', 'shortlist', 'recommend'].includes(tabName)) {
+                loadDropdowns();
+            }
+        }
+
+        document.getElementById('jobForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const data = {
+                title: document.getElementById('job_title').value,
+                company: document.getElementById('job_company').value,
+                description: document.getElementById('job_description').value,
+                required_skills: document.getElementById('job_skills').value,
+                experience_required: document.getElementById('job_experience').value,
+                min_qualification: document.getElementById('job_qualification').value,
+                location: document.getElementById('job_location').value
+            };
+            
+            const response = await fetch('/api/jobs', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(data)
+            });
+            
+            if (response.ok) {
+                alert('Job posted successfully!');
+                e.target.reset();
+            }
+        });
+
+        document.getElementById('candidateForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const data = {
+                name: document.getElementById('candidate_name').value,
+                email: document.getElementById('candidate_email').value,
+                skills: document.getElementById('candidate_skills').value,
+                experience: document.getElementById('candidate_experience').value,
+                education: document.getElementById('candidate_education').value,
+                resume_text: document.getElementById('candidate_resume').value
+            };
+            
+            const response = await fetch('/api/candidates', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(data)
+            });
+            
+            if (response.ok) {
+                alert('Candidate registered successfully!');
+                e.target.reset();
+            }
+        });
+
+        async function loadDropdowns() {
+            const [jobsRes, candidatesRes] = await Promise.all([
+                fetch('/api/jobs'),
+                fetch('/api/candidates')
+            ]);
+            
+            const jobs = await jobsRes.json();
+            const candidates = await candidatesRes.json();
+            
+            const jobSelects = ['apply_job_select', 'shortlist_job_select'];
+            jobSelects.forEach(id => {
+                const select = document.getElementById(id);
+                select.innerHTML = jobs.map(j => `<option value="${j.id}">${j.title} - ${j.company}</option>`).join('');
+            });
+            
+            const candidateSelects = ['apply_candidate_select', 'recommend_candidate_select'];
+            candidateSelects.forEach(id => {
+                const select = document.getElementById(id);
+                select.innerHTML = candidates.map(c => `<option value="${c.id}">${c.name} (${c.email})</option>`).join('');
+            });
+        }
+
+        async function submitApplication() {
+            const data = {
+                job_id: document.getElementById('apply_job_select').value,
+                candidate_id: document.getElementById('apply_candidate_select').value
+            };
+            
+            const response = await fetch('/api/apply', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(data)
+            });
+            
+            if (response.ok) {
+                alert('Application submitted successfully!');
+            }
+        }
+
+        async function performShortlisting() {
+            const jobId = document.getElementById('shortlist_job_select').value;
+            const topN = document.getElementById('top_n').value;
+            
+            const response = await fetch(`/api/shortlist/${jobId}?top_n=${topN}`);
+            const results = await response.json();
+            
+            const resultsDiv = document.getElementById('shortlistResults');
+            resultsDiv.innerHTML = '<h3>Shortlisted Candidates</h3>' + results.map(r => `
+                <div class="card">
+                    <h4>${r.candidate_name}</h4>
+                    <p><strong>Email:</strong> ${r.email}</p>
+                    <p><strong>Skills:</strong> ${r.skills}</p>
+                    <p><strong>Experience:</strong> ${r.experience} years</p>
+                    <p class="score">Match Score: ${r.match_score.toFixed(2)}%</p>
+                </div>
+            `).join('');
+        }
+
+        async function getRecommendations() {
+            const candidateId = document.getElementById('recommend_candidate_select').value;
+            
+            const response = await fetch(`/api/recommendations/${candidateId}`);
+            const results = await response.json();
+            
+            const resultsDiv = document.getElementById('recommendResults');
+            resultsDiv.innerHTML = '<h3>Recommended Jobs</h3>' + results.map(r => `
+                <div class="list-item">
+                    <div>
+                        <strong>${r.title}</strong> - ${r.company}<br>
+                        <small>${r.location}</small>
+                    </div>
+                    <div class="score">${r.match_score.toFixed(2)}%</div>
+                </div>
+            `).join('');
+        }
+    </script>
+</body>
+</html>
