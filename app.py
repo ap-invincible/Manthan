@@ -30,16 +30,24 @@ class Job(db.Model):
     min_qualification = db.Column(db.String(100))
     location = db.Column(db.String(200))
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    # prevent exact duplicate job posts for same company + title + location
+    __table_args__ = (
+        db.UniqueConstraint('title', 'company', 'location', name='uq_job_title_company_location'),
+    )
 
 class Candidate(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(200), nullable=False)
-    email = db.Column(db.String(200), unique=True, nullable=False)
+    email = db.Column(db.String(200), nullable=False)
     skills = db.Column(db.Text, nullable=False)
     experience = db.Column(db.Float, default=0)
     education = db.Column(db.String(200))
     resume_text = db.Column(db.Text)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    # block duplicate (name, email) combos
+    __table_args__ = (
+        db.UniqueConstraint('name', 'email', name='uq_candidate_name_email'),
+    )
 
 class Application(db.Model):
     id = db.Column(db.Integer, primary_key=True)
